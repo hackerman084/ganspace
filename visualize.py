@@ -126,7 +126,7 @@ def make_grid(latent, lat_mean, lat_comp, lat_stdev, act_mean, act_comp, act_std
 
 if __name__ == '__main__':
     global max_batch, sample_shape, feature_shape, inst, args, layer_key, model
-
+    print("In my version")
     args = Config().from_args()
     t_start = datetime.datetime.now()
     timestamp = lambda : datetime.datetime.now().strftime("%d.%m %H:%M")
