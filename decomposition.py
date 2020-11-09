@@ -183,12 +183,13 @@ def compute(config, dump_name, instrumented_model):
     model.partial_forward(model.sample_latent(1), layer_key)
     sample_shape = inst.retained_features()[layer_key].shape
     sample_dims = np.prod(sample_shape)
-    print('Feature shape:', sample_shape)
+    print('Sample shape In Decomp Method:', sample_shape)
 
     input_shape = inst.model.get_latent_shape()
     input_dims = inst.model.get_latent_dims()
-
-    config.components = min(config.components, sample_dims)
+    print("Sample Dims: {} Input shape {} input dims:{} ".format(sample_dims, input_shape, input_dims))
+    print("# components: {} Sample Dims: {}".format(config.components, sample_dims))
+    config.components = min(config.components, sample_dims) # looks like this also would need to be changed to force it to just be 2 or something stupid like that
     transformer = get_estimator(config.estimator, config.components, config.sparsity)
 
     X = None
@@ -290,6 +291,13 @@ def compute(config, dump_name, instrumented_model):
         X = X.reshape(-1, sample_dims)
         X -= X_global_mean
 
+    # this is where the real PCA is happening, and it returns the 
+    # principal components, std dev of X after projected to new basis
+    # and the explained variance
+
+    # Probably would need to go into estimators.py / configs to 
+    # mess around with projecting into different spaces / the number of 
+    # axes 
     X_comp, X_stdev, X_var_ratio = transformer.get_components()
     
     assert X_comp.shape[1] == sample_dims \
@@ -309,6 +317,9 @@ def compute(config, dump_name, instrumented_model):
 
     # Random projections
     # We expect these to explain much less of the variance
+
+    # Chooses random components to visualize 
+    # Then it projects a slice of the original dataset based on that
     random_dirs = get_random_dirs(config.components, np.prod(sample_shape))
     n_rand_samples = min(5000, X.shape[0])
     X_view = X[:n_rand_samples, :].T
