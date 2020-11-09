@@ -163,8 +163,9 @@ if __name__ == '__main__':
 
     # Shape of sample passed to PCA
     sample_shape = feature_shape*axis_mask
+    print("Axis mask: {} sample_shape before: {} ".format(axis_mask, sample_shape))
     sample_shape[sample_shape == 0] = 1
-
+    print("Sample shape after: {}".format(sample_shape))
     # Load or compute components
     dump_name = get_or_compute(args, inst)
     data = np.load(dump_name, allow_pickle=False) # does not contain object arrays
@@ -179,6 +180,8 @@ if __name__ == '__main__':
     n_comp = X_comp.shape[0]
     data.close()
 
+    print("X Shape {} X_Comp Shape {} Z_Comp Shape {} ".format(X.shape, X_comp.shape, Z_Comp.shape))
+    
     # Transfer components to device
     tensors = SimpleNamespace(
         X_comp = torch.from_numpy(X_comp).to(device).float(), #-1, 1, C, H, W
@@ -240,6 +243,7 @@ if __name__ == '__main__':
         edit_modes = ['activation', 'latent']
 
     # Summary grid, real components
+    # Think this is visualizing the massive grid of components
     for edit_mode in edit_modes:
         plt.figure(figsize = (14,12))
         plt.suptitle(f"{args.estimator.upper()}: {model.name} - {layer_name}, {get_edit_name(edit_mode)} edit", size=16)
