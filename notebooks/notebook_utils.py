@@ -38,11 +38,13 @@ def _create_strip_impl(inst, mode, layer, latents, x_comp, z_comp, act_stdev, la
     layer_start = np.clip(layer_start, 0, layer_end)
 
     if len(latents) > num_frames:
+        print("Batch over Latents")
         # Batch over latents
         return _create_strip_batch_lat(inst, mode, layer, latents, x_comp, z_comp,
             act_stdev, lat_stdev, act_mean, lat_mean, sigma, layer_start, layer_end, num_frames, center)
     else:
         # Batch over strip frames
+        print("Batch over strip frames")
         return _create_strip_batch_sigma(inst, mode, layer, latents, x_comp, z_comp,
             act_stdev, lat_stdev, act_mean, lat_mean, sigma, layer_start, layer_end, num_frames, center)
 
@@ -109,8 +111,10 @@ def _create_strip_batch_sigma(inst, mode, layer, latents, x_comp, z_comp, act_st
 def _create_strip_batch_lat(inst, mode, layer, latents, x_comp, z_comp, act_stdev, lat_stdev, act_mean, lat_mean, sigma, layer_start, layer_end, num_frames, center):    
     n_lat = len(latents)
     B = min(n_lat, 5)
-
+    
     max_lat = inst.model.get_max_latents()
+    print("n_lat : {} B: {} max_lat: {}".format(n_lat, B, max_lat)
+  
     if layer_end < 0 or layer_end > max_lat:
         layer_end = max_lat
     layer_start = np.clip(layer_start, 0, layer_end)
@@ -126,6 +130,8 @@ def _create_strip_batch_lat(inst, mode, layer, latents, x_comp, z_comp, act_stde
         z_batch_single = torch.cat(zs, 0)
 
         inst.close() # don't retain, remove edits
+        print("zs: {} z_batch_single: {}".format(zs, z_batch_single.numpy()))
+
         sigma_range = np.linspace(-sigma, sigma, num_frames, dtype=np.float32)
 
         normalize = lambda v : v / torch.sqrt(torch.sum(v**2, dim=-1, keepdim=True) + 1e-8)
@@ -142,8 +148,9 @@ def _create_strip_batch_lat(inst, mode, layer, latents, x_comp, z_comp, act_stde
                 zeroing_offset_act = normalize(x_comp)*dotp # offset that sets coordinate to zero
             else:
                 # Shift latent to lie on mean along given component
-                dotp = torch.sum((z_batch_single - lat_mean)*normalize(z_comp), dim=-1, keepdim=True)
+                dotp = torch.sum((z_batch_single - lat_mean)*normalize(z_comp), dim=-1, keepdim=True) # seems like they are normalizing by subtracting mean
                 zeroing_offset_lat = dotp*normalize(z_comp)
+                print("zeroing offset lat: {}".format(zeroing_offset_lat)
 
         for i in range(len(sigma_range)):
             s = sigma_range[i]
@@ -153,14 +160,16 @@ def _create_strip_batch_lat(inst, mode, layer, latents, x_comp, z_comp, act_stde
 
                 if mode in ['latent', 'both']:
                     delta = z_comp*s*lat_stdev
+                    print("z" {} delta: {} z_comp: {} s: {} lat_stdev: {}".format(z, delta, z_comp, s, lat_stdev))
+
                     for i in range(layer_start, layer_end):
-                        z[i] = z[i] - zeroing_offset_lat + delta
+                        z[i] = z[i] - zeroing_offset_lat + delta #feel like this is what's doing the w' = w + Vx part
 
                 if mode in ['activation', 'both']:
                     act_delta = x_comp*s*act_stdev
                     inst.edit_layer(layer, offset=act_delta - zeroing_offset_act)
 
-                img_batch = inst.model.sample_np(z)
+                img_batch = inst.model.sample_np(z) # creating image based on latent z
                 if img_batch.ndim == 3:
                     img_batch = np.expand_dims(img_batch, axis=0)
                     
