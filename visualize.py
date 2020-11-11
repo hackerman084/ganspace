@@ -76,9 +76,8 @@ def make_mp4(imgs, duration_secs, outname):
             raise sp.CalledProcessError(p.returncode, command)
 
 
-def make_grid(latent, lat_mean, lat_comp, lat_stdev, act_mean, act_comp, act_stdev, scale=1, n_rows=10, n_cols=5, make_plots=True, edit_type='latent'):
+def make_grid(latent, lat_mean, lat_comp, lat_stdev, act_mean, act_comp, act_stdev, scale=1, n_rows=2, n_cols=1, make_plots=True, edit_type='latent'):
     from notebooks.notebook_utils import create_strip_centered
-
     inst.remove_edits()
     x_range = np.linspace(-scale, scale, n_cols, dtype=np.float32) # scale in sigmas
 
@@ -244,6 +243,7 @@ if __name__ == '__main__':
 
     # Summary grid, real components
     # Think this is visualizing the massive grid of components
+    print("Latent for first vis is: {} {}".format(tensors.Z_global_mean.numpy(), tensors.Z_global_mean))
     for edit_mode in edit_modes:
         plt.figure(figsize = (14,12))
         plt.suptitle(f"{args.estimator.upper()}: {model.name} - {layer_name}, {get_edit_name(edit_mode)} edit", size=16)
