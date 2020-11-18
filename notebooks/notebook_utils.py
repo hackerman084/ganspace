@@ -113,7 +113,7 @@ def _create_strip_batch_lat(inst, mode, layer, latents, x_comp, z_comp, act_stde
     B = min(n_lat, 5)
     
     max_lat = inst.model.get_max_latents()
-    print("n_lat : {} B: {} max_lat: {}".format(n_lat, B, max_lat)
+    print("n_lat : {} B: {} max_lat: {}").format(n_lat, B, max_lat)
   
     if layer_end < 0 or layer_end > max_lat:
         layer_end = max_lat
@@ -150,7 +150,7 @@ def _create_strip_batch_lat(inst, mode, layer, latents, x_comp, z_comp, act_stde
                 # Shift latent to lie on mean along given component
                 dotp = torch.sum((z_batch_single - lat_mean)*normalize(z_comp), dim=-1, keepdim=True) # seems like they are normalizing by subtracting mean
                 zeroing_offset_lat = dotp*normalize(z_comp)
-                print("zeroing offset lat: {}".format(zeroing_offset_lat)
+                print("zeroing offset lat: {}").format(zeroing_offset_lat)
 
         for i in range(len(sigma_range)):
             s = sigma_range[i]
@@ -160,7 +160,7 @@ def _create_strip_batch_lat(inst, mode, layer, latents, x_comp, z_comp, act_stde
 
                 if mode in ['latent', 'both']:
                     delta = z_comp*s*lat_stdev
-                    print("z" {} delta: {} z_comp: {} s: {} lat_stdev: {}".format(z, delta, z_comp, s, lat_stdev))
+                    print("z {} delta: {} z_comp: {} s: {} lat_stdev: {}").format(z, delta, z_comp, s, lat_stdev)
 
                     for i in range(layer_start, layer_end):
                         z[i] = z[i] - zeroing_offset_lat + delta #feel like this is what's doing the w' = w + Vx part
