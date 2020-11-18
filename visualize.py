@@ -76,7 +76,7 @@ def make_mp4(imgs, duration_secs, outname):
             raise sp.CalledProcessError(p.returncode, command)
 
 
-def make_grid(latent, lat_mean, lat_comp, lat_stdev, act_mean, act_comp, act_stdev, scale=1, n_rows=2, n_cols=1, make_plots=True, edit_type='latent'):
+def make_grid(latent, lat_mean, lat_comp, lat_stdev, act_mean, act_comp, act_stdev, scale=1, n_rows=10, n_cols=5, make_plots=True, edit_type='latent'):
     from notebooks.notebook_utils import create_strip_centered
     inst.remove_edits()
     x_range = np.linspace(-scale, scale, n_cols, dtype=np.float32) # scale in sigmas
@@ -243,7 +243,6 @@ if __name__ == '__main__':
 
     # Summary grid, real components
     # Think this is visualizing the massive grid of components
-    # print("Latent for first vis is: {} {}".format(tensors.Z_global_mean.numpy(), tensors.Z_global_mean))
     for edit_mode in edit_modes:
         plt.figure(figsize = (14,12))
         plt.suptitle(f"{args.estimator.upper()}: {model.name} - {layer_name}, {get_edit_name(edit_mode)} edit", size=16)
@@ -251,6 +250,7 @@ if __name__ == '__main__':
             tensors.X_comp, tensors.X_stdev, scale=args.sigma, edit_type=edit_mode, n_rows=14)
         plt.savefig(outdir_summ / f'components_{get_edit_name(edit_mode)}.jpg', dpi=300)
         show()
+        print("==============================")
 
     if args.make_video:
         components = 15
@@ -281,10 +281,12 @@ if __name__ == '__main__':
             tensors.X_global_mean, random_dirs_act, tensors.X_stdev, scale=args.sigma, edit_type=edit_mode, n_rows=14)
         plt.savefig(outdir_summ / f'random_dirs_{get_edit_name(edit_mode)}.jpg', dpi=300)
         show()
+        print("==============================")
+
 
     # Random instances w/ components added
     n_random_imgs = 10
-    latents = model.sample_latent(n_samples=n_random_imgs)
+    latents = model.sample_latent(n_samples=n_random_imgs) # getting random images from the latent space
 
     for img_idx in trange(n_random_imgs, desc='Random images', ascii=True):
         #print(f'Creating visualizations for random image {img_idx+1}/{n_random_imgs}')
@@ -298,6 +300,8 @@ if __name__ == '__main__':
                 tensors.X_global_mean, tensors.X_comp, tensors.X_stdev, scale=args.sigma, edit_type=edit_mode, n_rows=14)
             plt.savefig(outdir_summ / f'samp{img_idx}_real_{get_edit_name(edit_mode)}.jpg', dpi=300)
             show()
+            print("==============================")
+
 
         if args.make_video:
             components = 5
