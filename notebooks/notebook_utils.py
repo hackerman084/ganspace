@@ -33,6 +33,8 @@ def _create_strip_impl(inst, mode, layer, latents, x_comp, z_comp, act_stdev, la
         latents = list(latents)
 
     max_lat = inst.model.get_max_latents()
+    print("Max Latents: {} len latents: {} num_frames: {} ".format(max_lat, len(latents), num_frames))
+
     if layer_end < 0 or layer_end > max_lat:
         layer_end = max_lat
     layer_start = np.clip(layer_start, 0, layer_end)
@@ -54,6 +56,7 @@ def _create_strip_batch_sigma(inst, mode, layer, latents, x_comp, z_comp, act_st
     batch_frames = [[] for _ in range(len(latents))]
     
     B = min(num_frames, 5)
+    print("Sigma:  {} Mode: {} center: {}".format(sigma, mode, center))
     lep_padded = ((num_frames - 1) // B + 1) * B
     sigma_range = np.linspace(-sigma, sigma, num_frames)
     sigma_range = np.concatenate([sigma_range, np.zeros((lep_padded - num_frames))])
