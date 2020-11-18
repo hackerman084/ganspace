@@ -179,7 +179,7 @@ if __name__ == '__main__':
     n_comp = X_comp.shape[0]
     data.close()
 
-    print("X Shape {} X_Comp Shape {} Z_Comp Shape {} ".format(X.shape, X_comp.shape, Z_Comp.shape))
+    print("X_Comp Shape {} Z_comp Shape {} ".format(X_comp.shape, Z_comp.shape))
     
     # Transfer components to device
     tensors = SimpleNamespace(
@@ -243,7 +243,7 @@ if __name__ == '__main__':
 
     # Summary grid, real components
     # Think this is visualizing the massive grid of components
-    print("Latent for first vis is: {} {}".format(tensors.Z_global_mean.numpy(), tensors.Z_global_mean))
+    # print("Latent for first vis is: {} {}".format(tensors.Z_global_mean.numpy(), tensors.Z_global_mean))
     for edit_mode in edit_modes:
         plt.figure(figsize = (14,12))
         plt.suptitle(f"{args.estimator.upper()}: {model.name} - {layer_name}, {get_edit_name(edit_mode)} edit", size=16)
